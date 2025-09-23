@@ -24,7 +24,7 @@ class DrawableObject {
     });
   }
 
-    drawFrame(ctx) {
+  drawFrame(ctx) {
     if (this instanceof Character || this instanceof Chicken) {
       ctx.beginPath();
       if (this instanceof Character) {

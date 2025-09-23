@@ -20,20 +20,34 @@ class MovableObject extends DrawableObject {
   }
 
   isAboveGround() {
-    return this.y < 135;
+    if (this instanceof Bottle) {
+      return true;
+    } else {
+      return this.y < 135;
+    }
   }
 
   isColliding(mo) {
+    let thisX = this.actualX !== undefined ? this.actualX : this.x;
+    let thisY = this.actualY !== undefined ? this.actualY : this.y;
+    let thisWidth = this.actualWidth !== undefined ? this.actualWidth : this.width;
+    let thisHeight = this.actualHeight !== undefined ? this.actualHeight : this.height;
+    
+    let otherX = mo.actualX !== undefined ? mo.actualX : mo.x;
+    let otherY = mo.actualY !== undefined ? mo.actualY : mo.y;
+    let otherWidth = mo.actualWidth !== undefined ? mo.actualWidth : mo.width;
+    let otherHeight = mo.actualHeight !== undefined ? mo.actualHeight : mo.height;
+    
     return (
-      this.actualX + this.actualWidth > mo.x &&
-      this.actualY + this.actualHeight > mo.y &&
-      this.actualX < mo.x &&
-      this.actualY < mo.y + mo.height
+      thisX + thisWidth > otherX &&
+      thisY + thisHeight > otherY &&
+      thisX < otherX + otherWidth &&
+      thisY < otherY + otherHeight
     );
   }
 
-  hit() {
-    this.health -= 5;
+  hit(value) {
+    this.health -= value;
     if (this.health < 0) {
       this.health = 0;
     } else {

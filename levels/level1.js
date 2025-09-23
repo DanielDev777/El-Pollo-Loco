@@ -26,4 +26,10 @@ const level1 = new Level(
         }
         return arr;
     })(),
+    [
+        new Bottle(500),
+        new Bottle(1000),
+        new Bottle(1500),
+        new Bottle(2000)
+    ],
 );

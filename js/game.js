@@ -24,6 +24,9 @@ document.addEventListener('keydown', (e) => {
         case 'Space':
             keyboard.SPACE = true;
             break;
+        case 'KeyD':
+            keyboard.D = true;
+            break;
     }
 });
 document.addEventListener('keyup', (e) => {
@@ -42,6 +45,9 @@ document.addEventListener('keyup', (e) => {
             break;
         case 'Space':
             keyboard.SPACE = false;
+            break;
+        case 'KeyD':
+            keyboard.D = false;
             break;
     }
 });

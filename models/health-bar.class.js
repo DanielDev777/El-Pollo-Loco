@@ -8,10 +8,10 @@ class HealthBar extends StatusBar {
         'img/7_statusbars/1_statusbar/2_statusbar_health/green/100.png',
     ];
 
-    constructor() {
+    constructor(x) {
         super();
         this.loadImages(this.IMAGES);
-        
+        this.x = x;
         this.y = 0;
         this.setPercentage(100);
     }
