@@ -10,6 +10,7 @@ class World {
     coinBar = new CoinBar();
     hotSauceBar = new HotSauceBar();
     thrownBottles = [];
+    gameDone = false;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -22,6 +23,11 @@ class World {
 
     setWorld() {
         this.character.world = this;
+        this.level.enemies.forEach((enemy) => {
+            if (enemy.world !== undefined) {
+                enemy.world = this;
+            }
+        });
     }
 
     run() {
@@ -45,10 +51,14 @@ class World {
 
     playerJumpsOnChicken() {
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy) && enemy instanceof Chicken && this.character.speedY < 0) {
+            if (this.checkPlayerJumpOnChicken(enemy)) {
                 enemy.health = 0;
             }
         });
+    }
+
+    checkPlayerJumpOnChicken(enemy) {
+        return this.character.isColliding(enemy) && enemy instanceof Chicken && this.character.isAboveGround() && this.character.speedY < 0;
     }
 
     chickenHitsPlayer() {
@@ -73,26 +83,31 @@ class World {
 
     draw() {
         this.clearCanvas();
-
         this.ctx.translate(this.camera_x, 0);
-        
+        this.createLevelObjects();
+        this.ctx.translate(-this.camera_x, 0);
+        this.createStatusBars();
+
+        self = this;
+        requestAnimationFrame(function () {
+            self.draw();
+        });
+    }
+
+    createLevelObjects() {
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds);
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.bottles);
         this.addObjectsToMap(this.thrownBottles);
-        
-        this.ctx.translate(-this.camera_x, 0);
+    }
+
+    createStatusBars() {
         this.addToMap(this.healthBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.hotSauceBar);
         this.addToMap(this.enemyHealthBar);
-
-        self = this;
-        requestAnimationFrame(function () {
-            self.draw();
-        });
     }
 
     clearCanvas() {

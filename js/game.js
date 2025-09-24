@@ -1,10 +1,36 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let startBtn = document.getElementById('start-btn');
+let gameOverEvent = new Event('game-over');
+let gameWonEvent = new Event('game-won');
+let overlay = document.getElementById('overlay-img');
 
-function init() {
+startBtn.addEventListener('click', startGame);
+
+window.addEventListener('game-over', gameOver, { once: true });
+window.addEventListener('game-won', gameWon, { once: true });
+
+function startGame() {
+    document.getElementById('overlay-img').style.display = 'none';
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
+    startBtn.style.display = 'none';
+}
+
+function gameWon() {
+    displayOverlay();
+    overlay.src = "img/You won, you lost/You won A.png";
+}
+
+function gameOver() {
+    displayOverlay();
+    overlay.src = "img/9_intro_outro_screens/game_over/oh no you lost!.png";
+}
+
+function displayOverlay() {
+    overlay.style.display = 'block';
+    overlay.style.background = 'rgba(0, 0, 0, .5)';
 }
 
 document.addEventListener('keydown', (e) => {

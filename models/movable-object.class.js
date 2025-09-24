@@ -38,12 +38,16 @@ class MovableObject extends DrawableObject {
     let otherWidth = mo.actualWidth !== undefined ? mo.actualWidth : mo.width;
     let otherHeight = mo.actualHeight !== undefined ? mo.actualHeight : mo.height;
     
-    return (
-      thisX + thisWidth > otherX &&
-      thisY + thisHeight > otherY &&
-      thisX < otherX + otherWidth &&
-      thisY < otherY + otherHeight
-    );
+    // return (
+    //   thisX + (thisWidth / 2) > otherX &&
+    //   thisY + thisHeight > otherY &&
+    //   thisX < otherX + otherWidth &&
+    //   thisY < otherY + otherHeight
+    // );
+    return this.x + (this.width / 2) > mo.x &&
+          this.y + this.height > mo.y &&
+          this.x < mo.x + (mo.width / 2) &&
+          this.y < mo.y + mo.height;
   }
 
   hit(value) {
