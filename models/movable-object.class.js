@@ -20,11 +20,10 @@ class MovableObject extends DrawableObject {
   }
 
   isAboveGround() {
-    if (this instanceof Bottle) {
-      return true;
-    } else {
-      return this.y < 135;
+    if (this instanceof Bottle && this.isSplashing) {
+      return false;
     }
+    return this.y < 135;
   }
 
   isColliding(mo) {

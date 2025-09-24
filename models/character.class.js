@@ -6,57 +6,60 @@ class Character extends MovableObject {
   actualWidth = this.width - 40;
   actualY = this.y + 110;
   actualHeight = this.height - 110;
-  // y = 20;
+  
   IMAGES_WALKING = [
-    "img/2_character_pepe/2_walk/W-21.png",
-    "img/2_character_pepe/2_walk/W-22.png",
-    "img/2_character_pepe/2_walk/W-23.png",
-    "img/2_character_pepe/2_walk/W-24.png",
-    "img/2_character_pepe/2_walk/W-25.png",
-    "img/2_character_pepe/2_walk/W-26.png",
+    'img/2_character_pepe/2_walk/W-21.png',
+    'img/2_character_pepe/2_walk/W-22.png',
+    'img/2_character_pepe/2_walk/W-23.png',
+    'img/2_character_pepe/2_walk/W-24.png',
+    'img/2_character_pepe/2_walk/W-25.png',
+    'img/2_character_pepe/2_walk/W-26.png',
   ];
   IMAGES_JUMPING = [
-    "img/2_character_pepe/3_jump/J-31.png",
-    "img/2_character_pepe/3_jump/J-32.png",
-    "img/2_character_pepe/3_jump/J-33.png",
-    "img/2_character_pepe/3_jump/J-34.png",
-    "img/2_character_pepe/3_jump/J-35.png",
-    "img/2_character_pepe/3_jump/J-36.png",
-    "img/2_character_pepe/3_jump/J-37.png",
-    "img/2_character_pepe/3_jump/J-38.png",
-    "img/2_character_pepe/3_jump/J-39.png",
+    'img/2_character_pepe/3_jump/J-31.png',
+    'img/2_character_pepe/3_jump/J-32.png',
+    'img/2_character_pepe/3_jump/J-33.png',
+    'img/2_character_pepe/3_jump/J-34.png',
+    'img/2_character_pepe/3_jump/J-35.png',
+    'img/2_character_pepe/3_jump/J-36.png',
+    'img/2_character_pepe/3_jump/J-37.png',
+    'img/2_character_pepe/3_jump/J-38.png',
+    'img/2_character_pepe/3_jump/J-39.png',
   ];
   IMAGES_HURTING = [
-    "img/2_character_pepe/4_hurt/H-41.png",
-    "img/2_character_pepe/4_hurt/H-42.png",
-    "img/2_character_pepe/4_hurt/H-43.png",
+    'img/2_character_pepe/4_hurt/H-41.png',
+    'img/2_character_pepe/4_hurt/H-42.png',
+    'img/2_character_pepe/4_hurt/H-43.png',
   ];
   IMAGES_DEAD = [
-    "img/2_character_pepe/5_dead/D-51.png",
-    "img/2_character_pepe/5_dead/D-52.png",
-    "img/2_character_pepe/5_dead/D-53.png",
-    "img/2_character_pepe/5_dead/D-54.png",
-    "img/2_character_pepe/5_dead/D-55.png",
-    "img/2_character_pepe/5_dead/D-56.png",
-    "img/2_character_pepe/5_dead/D-57.png",
+    'img/2_character_pepe/5_dead/D-51.png',
+    'img/2_character_pepe/5_dead/D-52.png',
+    'img/2_character_pepe/5_dead/D-53.png',
+    'img/2_character_pepe/5_dead/D-54.png',
+    'img/2_character_pepe/5_dead/D-55.png',
+    'img/2_character_pepe/5_dead/D-56.png',
+    'img/2_character_pepe/5_dead/D-57.png',
   ];
-  walking_sound = new Audio("audio/walking.mp3");
+  
+  walking_sound = new Audio('audio/walking.mp3');
   world;
+  
+  // Backflip properties
   rotation = 0;
   isBackflipping = false;
   backflipSpeed = 0;
   backflipReady = false;
-  lastSpaceState = false;
-  lastDState = false;
+  isThrowingCooldown = false;
+  
+  // Animation properties
   jumpAnimationPlayed = false;
   jumpAnimationIndex = 0;
   jumpAnimationFrameCounter = 0;
   deathAnimationComplete = false;
   deathAnimationCounter = 0;
-  deathAnimationComplete = false;
 
   constructor() {
-    super().loadImage("img/2_character_pepe/2_walk/W-21.png");
+    super().loadImage('img/2_character_pepe/2_walk/W-21.png');
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.IMAGES_HURTING);
@@ -67,40 +70,56 @@ class Character extends MovableObject {
 
   animate() {
     setInterval(() => {
-        this.handleMovement();
-        this.handleJumping();
-        this.throwBottle();
-        this.updateBackflip();
-        this.resetBackflipOnLanding();
-        this.lastSpaceState = this.world.keyboard.SPACE;
-        this.lastDState = this.world.keyboard.D;
-        this.world.camera_x = -this.x + 100;
+      this.updateMovement();
+      this.updateBackflip();
+      this.resetBackflipOnLanding();
+      this.updateCamera();
     }, 1000 / 60);
+    
     setInterval(() => {
-      this.handleAnimations();
+      this.updateAnimations();
     }, 50);
   }
 
-  throwBottle() {
-    if (
-      this.world &&
-      this.world.keyboard &&
-      this.world.hotSauceBar.percentage >= 25
-    ) {
-      let currentDPressed = this.world.keyboard.D;
-
-      if (currentDPressed && !this.lastDState) {
-        let thrownBottle = new Bottle(this.x + 100);
-        thrownBottle.throw(this.x + 100, this.actualY + 40, this.world);
-        this.world.thrownBottles.push(thrownBottle);
-        this.world.hotSauceBar.setPercentage(
-          this.world.hotSauceBar.percentage - 25
-        );
-      }
+  updateMovement() {
+    this.handleMovement();
+    this.handleJumping();
+    this.handleThrowing();
+    
+    // Update input states after processing all inputs
+    if (this.world && this.world.inputManager) {
+      this.world.inputManager.updateInputStates();
     }
   }
 
-  handleAnimations() {
+  updateCamera() {
+    if (this.world && this.world.cameraManager) {
+      this.world.cameraManager.updateCamera();
+    }
+  }
+
+  handleThrowing() {
+    if (!this.world || !this.world.inputManager) return;
+    
+    if (this.world.inputManager.isNewKeyPress('D') && 
+        this.world.hotSauceBar.percentage >= 25 &&
+        !this.isThrowingCooldown) {
+      this.throwBottle();
+      this.isThrowingCooldown = true;
+      setTimeout(() => {
+        this.isThrowingCooldown = false;
+      }, 300);
+    }
+  }
+
+  throwBottle() {
+    const thrownBottle = new Bottle(this.x + 100);
+    thrownBottle.throw(this.x + 100, this.actualY + 40, this.world);
+    this.world.thrownBottles.push(thrownBottle);
+    this.world.hotSauceBar.setPercentage(this.world.hotSauceBar.percentage - 25);
+  }
+
+  updateAnimations() {
     if (this.isDead()) {
       this.playSlowDeathAnimation();
     } else if (this.isHurt()) {
@@ -108,49 +127,77 @@ class Character extends MovableObject {
     } else if (this.isAboveGround()) {
       this.playJumpAnimation();
     } else {
-      if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-        this.playAnimation(this.IMAGES_WALKING);
-      }
+      this.playWalkingAnimation();
+    }
+  }
+
+  playWalkingAnimation() {
+    if (this.world && this.world.inputManager && 
+        (this.world.inputManager.isKeyPressed('RIGHT') || 
+         this.world.inputManager.isKeyPressed('LEFT'))) {
+      this.playAnimation(this.IMAGES_WALKING);
     }
   }
 
   handleMovement() {
-    if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-      this.otherDirection = false;
-      this.moveRight();
-      if (!this.isAboveGround()) {
-        this.walking_sound.play();
-      }
+    if (!this.world || !this.world.inputManager) return;
+    
+    if (this.world.inputManager.canMoveRight(this, this.world.level.level_end_x)) {
+      this.moveRightWithSound();
     }
 
-    if (this.world.keyboard.LEFT && this.x > 0) {
-      this.otherDirection = true;
-      this.moveLeft();
-      if (!this.isAboveGround()) {
-        this.walking_sound.play();
-      }
+    if (this.world.inputManager.canMoveLeft(this)) {
+      this.moveLeftWithSound();
+    }
+  }
+
+  moveRightWithSound() {
+    this.otherDirection = false;
+    this.moveRight();
+    this.playWalkingSound();
+  }
+
+  moveLeftWithSound() {
+    this.otherDirection = true;
+    this.moveLeft();
+    this.playWalkingSound();
+  }
+
+  playWalkingSound() {
+    if (!this.isAboveGround()) {
+      this.walking_sound.play();
     }
   }
 
   handleJumping() {
-    if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-      this.jump();
-      this.backflipReady = true;
-      this.jumpAnimationPlayed = false;
-      this.jumpAnimationIndex = 0;
-      this.jumpAnimationFrameCounter = 0;
+    if (!this.world || !this.world.inputManager) return;
+    
+    if (this.world.inputManager.isKeyPressed('SPACE') && !this.isAboveGround()) {
+      this.startJump();
     }
 
-    if (this.isAboveGround()) {
-      if (
-        this.world.keyboard.SPACE &&
-        !this.lastSpaceState &&
-        this.backflipReady
-      ) {
-        this.backflip();
-        this.backflipReady = false;
-      }
+    if (this.isAboveGround() && 
+        this.world.inputManager.isNewKeyPress('SPACE') && 
+        this.backflipReady) {
+      this.performBackflip();
     }
+  }
+
+  startJump() {
+    this.jump();
+    this.backflipReady = true;
+    this.resetJumpAnimation();
+  }
+
+  resetJumpAnimation() {
+    this.jumpAnimationPlayed = false;
+    this.jumpAnimationIndex = 0;
+    this.jumpAnimationFrameCounter = 0;
+  }
+
+  performBackflip() {
+    this.backflip();
+    this.backflipReady = false;
   }
 
   updateBackflip() {

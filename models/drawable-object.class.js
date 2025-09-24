@@ -32,16 +32,11 @@ class DrawableObject {
         this.actualWidth = this.width - 40;
         this.actualY = this.y + 110;
         this.actualHeight = this.height - 110;
-        ctx.rect(
-          this.actualX,
-          this.actualY,
-          this.actualWidth,
-          this.actualHeight
-        );
+        ctx.rect(this.actualX, this.actualY, this.actualWidth, this.actualHeight);
       } else {
         ctx.rect(this.x, this.y, this.width, this.height);
       }
-      ctx.strokeStyle = "red";
+      ctx.strokeStyle = 'red';
       ctx.stroke();
     }
   }

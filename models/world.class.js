@@ -4,20 +4,33 @@ class World {
     ctx;
     canvas;
     keyboard;
-    camera_x = 0;
     healthBar = new HealthBar(40);
     enemyHealthBar = new HealthBar(800);
     coinBar = new CoinBar();
     hotSauceBar = new HotSauceBar();
     thrownBottles = [];
+    
+    // Manager instances
+    collisionManager;
+    cameraManager;
+    inputManager;
+    uiManager;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        this.draw();
+        this.initializeManagers();
         this.setWorld();
+        this.draw();
         this.run();
+    }
+
+    initializeManagers() {
+        this.collisionManager = new CollisionManager(this);
+        this.cameraManager = new CameraManager(this);
+        this.inputManager = new InputManager(this.keyboard);
+        this.uiManager = new UIManager(this);
     }
 
     setWorld() {
@@ -26,73 +39,40 @@ class World {
 
     run() {
         setInterval(() => {
-            this.checkCollisions();
-            this.updateEnemyHealthBarPosition();
+            this.collisionManager.checkAllCollisions();
+        }, 1000 / 60); // 60fps collision detection
+        
+        setInterval(() => {
+            this.uiManager.updateEnemyHealthBarPosition();
         }, 200);
-    }
-
-    checkCollisions() {
-        this.playerJumpsOnChicken();
-        this.chickenHitsPlayer();
-        this.characterCollectsBottle();
-    }
-
-    updateEnemyHealthBarPosition() {
-        if (this.character.x >= 1900 && this.enemyHealthBar.x !== 500) {
-            this.enemyHealthBar.x = 500;
-        }
-    }
-
-    playerJumpsOnChicken() {
-        this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy) && enemy instanceof Chicken && this.character.speedY < 0) {
-                enemy.health = 0;
-            }
-        });
-    }
-
-    chickenHitsPlayer() {
-        this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy) && !enemy.isDead()) {
-                if (!(enemy instanceof Chicken && this.character.speedY > 0)) {
-                    this.character.hit(5);
-                    this.healthBar.setPercentage(this.character.health);
-                }
-            }
-        });
-    }
-
-    characterCollectsBottle() {
-        this.level.bottles.forEach(bottle => {
-            if (this.character.isColliding(bottle)) {
-                this.level.bottles.splice(this.level.bottles.indexOf(bottle), 1);
-                this.hotSauceBar.setPercentage(this.hotSauceBar.percentage + 25);
-            }
-        });
     }
 
     draw() {
         this.clearCanvas();
 
-        this.ctx.translate(this.camera_x, 0);
+        this.cameraManager.translateForWorldObjects(this.ctx);
+        this.renderWorldObjects();
         
+        this.cameraManager.translateForUI(this.ctx);
+        this.renderUIElements();
+
+        requestAnimationFrame(() => {
+            this.draw();
+        });
+    }
+
+    renderWorldObjects() {
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds);
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.bottles);
         this.addObjectsToMap(this.thrownBottles);
-        
-        this.ctx.translate(-this.camera_x, 0);
-        this.addToMap(this.healthBar);
-        this.addToMap(this.coinBar);
-        this.addToMap(this.hotSauceBar);
-        this.addToMap(this.enemyHealthBar);
+    }
 
-        self = this;
-        requestAnimationFrame(function () {
-            self.draw();
-        });
+    renderUIElements() {
+        const uiElements = this.uiManager.getUIElements();
+        uiElements.forEach(element => this.addToMap(element));
     }
 
     clearCanvas() {
