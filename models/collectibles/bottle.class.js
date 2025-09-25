@@ -22,15 +22,22 @@ class Bottle extends CollectibleObject {
         this.loadImages(this.IMAGES_SPLASH);
     }
 
-    throw(x, y, world) {
+    throw(x, y, world, direction) {
         this.x = x;
         this.y = y;
         this.speedY = 20;
-        this.speedX = 20;
+        if (direction == 'right') {
+            this.speedX = 20;
+        } else if (direction == 'left') {
+            this.speedX = -20;
+        }
         this.world = world;
         this.isSplashing = false;
         this.applyGravity();
-        
+        this.calcThrowInterval();
+    }
+
+    calcThrowInterval() {
         this.throwInterval = setInterval(() => {
             this.updatePosition();
             this.checkCollisions();

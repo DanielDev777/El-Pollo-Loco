@@ -98,7 +98,6 @@ class Character extends MovableObject {
       this.resetBackflipOnLanding();
       this.lastSpaceState = this.world.keyboard.SPACE;
       this.lastDState = this.world.keyboard.D;
-      this.world.camera_x = -this.x + 100;
       this.updateLastInputTime();
     }, 1000 / 60);
     setInterval(() => {
@@ -107,20 +106,17 @@ class Character extends MovableObject {
   }
 
   throwBottle() {
-    if (
-      this.world &&
-      this.world.keyboard &&
-      this.world.hotSauceBar.percentage >= 25
-    ) {
+    if (this.world && this.world.keyboard && this.world.hotSauceBar.percentage >= 25) {
       let currentDPressed = this.world.keyboard.D;
-
       if (currentDPressed && !this.lastDState) {
         let thrownBottle = new Bottle(this.x + 100);
-        thrownBottle.throw(this.x + 100, this.actualY + 40, this.world);
+        if (this.otherDirection == false) {
+          thrownBottle.throw(this.x + 100, this.actualY + 40, this.world, 'right');
+        } else {
+          thrownBottle.throw(this.x - 100, this.actualY + 40, this.world, 'left');
+        }
         this.world.thrownBottles.push(thrownBottle);
-        this.world.hotSauceBar.setPercentage(
-          this.world.hotSauceBar.percentage - 25
-        );
+        this.world.hotSauceBar.setPercentage(this.world.hotSauceBar.percentage - 25);
       }
     }
   }
@@ -129,15 +125,12 @@ class Character extends MovableObject {
     if (this.isDead()) {
       this.playSlowDeathAnimation();
       dispatchEvent(gameOverEvent);
-      this.world.gameDone = true;
-      
     } else if (this.isHurt()) {
       this.playAnimation(this.IMAGES_HURTING);
     } else if (this.isAboveGround()) {
       this.playJumpAnimation();
-    } else if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT)) {
+    } else if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT) && this.world.gameDone === false) {
       this.playAnimation(this.IMAGES_WALKING);
-      console.log(this.world.gameDone);
     } else {
       this.playIdleAnimation();
     }

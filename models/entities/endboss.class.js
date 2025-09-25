@@ -3,6 +3,8 @@ class Endboss extends MovableObject {
     width = 250;
     x = 2500;
     y = 50;
+    readyToFight = false;
+    speed = 10;
     IMAGES_WALKING = [
         'img/4_enemie_boss_chicken/1_walk/G1.png',
         'img/4_enemie_boss_chicken/1_walk/G2.png',
@@ -57,10 +59,13 @@ class Endboss extends MovableObject {
                 dispatchEvent(gameWonEvent);
             } else if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURTING);
+            } else if (this.readyToFight) {
+                this.playAnimation(this.IMAGES_WALKING);
             } else {
                 this.playAnimation(this.IMAGES_ALERT);
             }
         }, 200);
+        this.attack();
     }
 
     playDeathAnimation() {
@@ -75,6 +80,30 @@ class Endboss extends MovableObject {
         if (isLastFrame) {
             this.deathAnimationComplete = true;
             this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
+        }
+    }
+
+    attack() {
+        setInterval(() => {
+            if (this.world) {
+                this.checkPosition();
+                if (this.readyToFight && this.x > 0 && !this.isDead() && this.otherDirection === false) {
+                    console.log('ATTACKING LEFT');
+                    
+                    this.moveLeft();
+                } else if (this.readyToFight && !this.isDead() && this.otherDirection === true) {
+                    console.log('ATTACKING RIGHT');
+                    this.moveRight(true);
+                }
+            }
+        }, 1000 / 60);
+    }
+
+    checkPosition() {
+        if (this.x <= 0) {
+            this.otherDirection = true;
+        } else if (this.x >= this.world.level.level_end_x) {
+            this.otherDirection = false;
         }
     }
 }

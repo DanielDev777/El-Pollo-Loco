@@ -28,22 +28,6 @@ class MovableObject extends DrawableObject {
   }
 
   isColliding(mo) {
-    let thisX = this.actualX !== undefined ? this.actualX : this.x;
-    let thisY = this.actualY !== undefined ? this.actualY : this.y;
-    let thisWidth = this.actualWidth !== undefined ? this.actualWidth : this.width;
-    let thisHeight = this.actualHeight !== undefined ? this.actualHeight : this.height;
-    
-    let otherX = mo.actualX !== undefined ? mo.actualX : mo.x;
-    let otherY = mo.actualY !== undefined ? mo.actualY : mo.y;
-    let otherWidth = mo.actualWidth !== undefined ? mo.actualWidth : mo.width;
-    let otherHeight = mo.actualHeight !== undefined ? mo.actualHeight : mo.height;
-    
-    // return (
-    //   thisX + (thisWidth / 2) > otherX &&
-    //   thisY + thisHeight > otherY &&
-    //   thisX < otherX + otherWidth &&
-    //   thisY < otherY + otherHeight
-    // );
     return this.x + (this.width / 2) > mo.x &&
           this.y + this.height > mo.y &&
           this.x < mo.x + (mo.width / 2) &&
@@ -69,9 +53,11 @@ class MovableObject extends DrawableObject {
     return this.health == 0;
   }
 
-  moveRight() {
+  moveRight(boss) {
     this.x += this.speed;
-    this.otherDirection = false;
+    if (!boss) {
+      this.otherDirection = false;
+    }
   }
 
   moveLeft() {

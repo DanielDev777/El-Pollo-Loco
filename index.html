@@ -16,22 +16,36 @@
     </div>
     <button id="start-btn">Start Game</button>
 
-    <script src="./models/drawable-object.class.js"></script>
-    <script src="./models/movable-object.class.js"></script>
-    <script src="./models/collectible-object.class.js"></script>
-    <script src="./models/bottle.class.js"></script>
-    <script src="./models/status-bar.class.js"></script>
-    <script src="./models/health-bar.class.js"></script>
-    <script src="./models/coin-bar.class.js"></script>
-    <script src="./models/hot-sauce-bar.class.js"></script>
-    <script src="./models/chicken.class.js"></script>
-    <script src="./models/character.class.js"></script>
-    <script src="./models/cloud.class.js"></script>
-    <script src="./models/world.class.js"></script>
-    <script src="./models/background-object.class.js"></script>
-    <script src="./models/keyboard.class.js"></script>
-    <script src="./models/level.class.js"></script>
-    <script src="./models/endboss.class.js"></script>
+    <!-- Base classes (must load first) -->
+    <script src="./models/base/drawable-object.class.js"></script>
+    <script src="./models/base/movable-object.class.js"></script>
+    <script src="./models/base/collectible-object.class.js"></script>
+    
+    <!-- Core systems -->
+    <script src="./models/core/keyboard.class.js"></script>
+    <script src="./models/core/level.class.js"></script>
+    
+    <!-- Collectibles -->
+    <script src="./models/collectibles/bottle.class.js"></script>
+    <script src="./models/collectibles/coin.class.js"></script>
+    
+    <!-- UI Components -->
+    <script src="./models/ui/status-bar.class.js"></script>
+    <script src="./models/ui/health-bar.class.js"></script>
+    <script src="./models/ui/coin-bar.class.js"></script>
+    <script src="./models/ui/hot-sauce-bar.class.js"></script>
+    
+    <!-- Entities -->
+    <script src="./models/entities/chicken.class.js"></script>
+    <script src="./models/entities/character.class.js"></script>
+    <script src="./models/entities/endboss.class.js"></script>
+    
+    <!-- Environment -->
+    <script src="./models/environment/background-object.class.js"></script>
+    <script src="./models/environment/cloud.class.js"></script>
+    
+    <!-- World (must load after all other models) -->
+    <script src="./models/core/world.class.js"></script>
     <script src="./levels/level1.js"></script>
     <script src="./js/game.js"></script>
 </body>

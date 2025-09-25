@@ -5,8 +5,8 @@ class World {
     canvas;
     keyboard;
     camera_x = 0;
-    healthBar = new HealthBar(40);
-    enemyHealthBar = new HealthBar(800);
+    healthBar = new HealthBar(40, 'character');
+    enemyHealthBar = new HealthBar(800, 'enemy');
     coinBar = new CoinBar();
     hotSauceBar = new HotSauceBar();
     thrownBottles = [];
@@ -16,6 +16,10 @@ class World {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
+        
+        // Disable image smoothing to prevent seams
+        this.ctx.imageSmoothingEnabled = false;
+        
         this.draw();
         this.setWorld();
         this.run();
@@ -24,29 +28,72 @@ class World {
     setWorld() {
         this.character.world = this;
         this.level.enemies.forEach((enemy) => {
-            if (enemy.world !== undefined) {
-                enemy.world = this;
-            }
+            enemy.world = this;
         });
+        this.level.clouds.forEach(cloud => {
+            cloud.world = this;
+        })
     }
 
     run() {
         setInterval(() => {
             this.checkCollisions();
-            this.updateEnemyHealthBarPosition();
+            this.checkGameConditions();
+            this.checkPlayerPosition();
         }, 200);
+        setInterval(() => {
+            this.updateCamera();
+        }, 1000 / 60);
     }
 
     checkCollisions() {
         this.playerJumpsOnChicken();
         this.chickenHitsPlayer();
         this.characterCollectsBottle();
+        this.characterCollectsCoin();
+    }
+
+    checkGameConditions() {
+        let endboss = this.level.enemies.find(obj => obj instanceof Endboss)
+        if (this.character.health <= 0 || endboss.health <= 0) {
+            this.gameDone = true;
+        }
+    }
+
+    characterCollectsCoin() {
+        this.level.coins.forEach(coin => {
+            if (this.character.isColliding(coin)) {
+                this.level.coins.splice(this.level.coins.indexOf(coin), 1);
+                this.coinBar.setPercentage(this.coinBar.percentage + 25);
+            }
+        });
+    }
+
+    checkPlayerPosition() {
+        let boss = this.level.enemies.find(obj => obj instanceof Endboss)
+        if (this.character.x >= 2000 && this.enemyHealthBar.x !== 500){
+            this.updateEnemyHealthBarPosition();
+            boss.readyToFight = true;
+        }
     }
 
     updateEnemyHealthBarPosition() {
-        if (this.character.x >= 1900 && this.enemyHealthBar.x !== 500) {
-            this.enemyHealthBar.x = 500;
+        this.enemyHealthBar.x = 500;
+    }
+
+    updateCamera() {
+        let targetCameraX;
+        if ((this.keyboard.LEFT && this.character.x > 0) || this.character.otherDirection) {
+            const cameraOffset = this.canvas.width / 2;
+            targetCameraX = -this.character.x + cameraOffset;
+        } else {
+            targetCameraX = -this.character.x + 100;
         }
+        const leftBoundary = 0;
+        const rightBoundary = -(2800 - this.canvas.width); // Extended boundary for boss area
+        targetCameraX = Math.max(rightBoundary, Math.min(leftBoundary, targetCameraX));
+        this.camera_x = this.camera_x + (targetCameraX - this.camera_x) * 0.1;
+        this.camera_x = Math.round(this.camera_x);
     }
 
     playerJumpsOnChicken() {
@@ -100,6 +147,7 @@ class World {
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.bottles);
+        this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.thrownBottles);
     }
 
