@@ -1,5 +1,5 @@
 class World {
-    character = new Character();
+    character;
     level = level1;
     ctx;
     canvas;
@@ -11,16 +11,18 @@ class World {
     hotSauceBar = new HotSauceBar();
     thrownBottles = [];
     gameDone = false;
+    frameCount = 0;
+    gameWonTriggered = false;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-        
-        // Disable image smoothing to prevent seams
-        this.ctx.imageSmoothingEnabled = false;
-        
-        this.draw();
+        this.character = new Character();
+        this.character.resetCharacter();
+        this.level = createLevel1();
+        this.specialMoves = [];
+        this.intervals = [];
         this.setWorld();
         this.run();
     }
@@ -36,14 +38,38 @@ class World {
     }
 
     run() {
-        setInterval(() => {
-            this.checkCollisions();
-            this.checkGameConditions();
-            this.checkPlayerPosition();
-        }, 200);
-        setInterval(() => {
+        const gameLoopId = requestAnimationFrame(() => this.gameLoop());
+        this.intervals.push({ type: 'raf', id: gameLoopId });
+        
+        const collisionId = setInterval(() => this.checkCollisions(), 200);
+        this.intervals.push({ type: 'interval', id: collisionId });
+    }
+
+    stopAllIntervals() {
+        this.intervals.forEach(interval => {
+            if (interval.type === 'interval') {
+                clearInterval(interval.id);
+            } else if (interval.type === 'raf') {
+                cancelAnimationFrame(interval.id);
+            }
+        });
+        this.intervals = [];
+        this.gameDone = true;
+    }
+
+    gameLoop() {
+        if (!this.gameDone) {
             this.updateCamera();
-        }, 1000 / 60);
+            if (this.frameCount % 3 === 0) {
+                this.checkCollisions();
+                this.checkGameConditions();
+                this.checkPlayerPosition();
+                this.checkSpecialMoveCollisions();
+            }
+            this.frameCount++;
+        }
+        this.draw();
+        requestAnimationFrame(() => this.gameLoop());
     }
 
     checkCollisions() {
@@ -55,9 +81,24 @@ class World {
 
     checkGameConditions() {
         let endboss = this.level.enemies.find(obj => obj instanceof Endboss)
-        if (this.character.health <= 0 || endboss.health <= 0) {
+        if (this.character.health <= 0) {
             this.gameDone = true;
         }
+        if (endboss && endboss.health <= 0 && !this.gameWonTriggered) {
+            this.gameWonTriggered = true;
+            this.gameDone = true;
+            dispatchEvent(gameWonEvent);
+        }
+    }
+
+    checkSpecialMoveCollisions() {
+        this.specialMoves.forEach((specialMove) => {
+            this.level.enemies.forEach((enemy) => {
+                if (enemy.isColliding(specialMove) && enemy instanceof Endboss) {
+                    enemy.health = 0;
+                }
+            });
+        });
     }
 
     characterCollectsCoin() {
@@ -92,8 +133,7 @@ class World {
         const leftBoundary = 0;
         const rightBoundary = -(2800 - this.canvas.width); // Extended boundary for boss area
         targetCameraX = Math.max(rightBoundary, Math.min(leftBoundary, targetCameraX));
-        this.camera_x = this.camera_x + (targetCameraX - this.camera_x) * 0.1;
-        this.camera_x = Math.round(this.camera_x);
+        this.camera_x = Math.round(targetCameraX);
     }
 
     playerJumpsOnChicken() {
@@ -134,11 +174,6 @@ class World {
         this.createLevelObjects();
         this.ctx.translate(-this.camera_x, 0);
         this.createStatusBars();
-
-        self = this;
-        requestAnimationFrame(function () {
-            self.draw();
-        });
     }
 
     createLevelObjects() {
@@ -149,6 +184,8 @@ class World {
         this.addObjectsToMap(this.level.bottles);
         this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.thrownBottles);
+        this.addObjectsToMap(this.specialMoves);
+        this.removeExpiredSpecialMoves();
     }
 
     createStatusBars() {
@@ -183,6 +220,10 @@ class World {
         } else if (mo.otherDirection) {
             this.flipImageBack(mo);
         }
+    }
+
+    removeExpiredSpecialMoves() {
+        this.specialMoves = this.specialMoves.filter(move => !move.isExpired());
     }
 
     flipImage(mo) {

@@ -15,36 +15,40 @@
         </canvas>
     </div>
     <button id="start-btn">Start Game</button>
+    <button id="restart-btn" class="d-none">Restart</button>
 
-    <!-- Base classes (must load first) -->
+    <div class="instructions">
+        <h2>Instructions</h2>
+        <p>Press space to jump</p>
+        <p>Press left or right to move</p>
+        <p>Press space in the air again, trust me. ;)</p>
+        <p>Press D after collecting some bottles to throw hot sauce</p>
+        <p>Press F when the coin bar is full for something you always wanted to do</p>
+    </div>
+
     <script src="./models/base/drawable-object.class.js"></script>
     <script src="./models/base/movable-object.class.js"></script>
     <script src="./models/base/collectible-object.class.js"></script>
     
-    <!-- Core systems -->
     <script src="./models/core/keyboard.class.js"></script>
     <script src="./models/core/level.class.js"></script>
     
-    <!-- Collectibles -->
     <script src="./models/collectibles/bottle.class.js"></script>
     <script src="./models/collectibles/coin.class.js"></script>
     
-    <!-- UI Components -->
     <script src="./models/ui/status-bar.class.js"></script>
     <script src="./models/ui/health-bar.class.js"></script>
     <script src="./models/ui/coin-bar.class.js"></script>
     <script src="./models/ui/hot-sauce-bar.class.js"></script>
     
-    <!-- Entities -->
     <script src="./models/entities/chicken.class.js"></script>
     <script src="./models/entities/character.class.js"></script>
     <script src="./models/entities/endboss.class.js"></script>
+    <script src="./models/entities/special-move.class.js"></script>
     
-    <!-- Environment -->
     <script src="./models/environment/background-object.class.js"></script>
     <script src="./models/environment/cloud.class.js"></script>
     
-    <!-- World (must load after all other models) -->
     <script src="./models/core/world.class.js"></script>
     <script src="./levels/level1.js"></script>
     <script src="./js/game.js"></script>

@@ -67,8 +67,10 @@ class MovableObject extends DrawableObject {
   playAnimation(images) {
     let i = this.currentImage % images.length;
     let path = images[i];
-    this.img = this.imageCache[path];
-    this.currentImage++;
+    if (this.imageCache[path] && this.imageCache[path].complete && this.imageCache[path].naturalWidth > 0) {
+      this.img = this.imageCache[path];
+      this.currentImage++;
+    }
   }
 
   jump() {
