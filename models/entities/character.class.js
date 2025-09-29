@@ -89,8 +89,8 @@ class Character extends MovableObject {
 		this.loadImages(this.IMAGES_JUMPING);
 		this.loadImages(this.IMAGES_HURTING);
 		this.loadImages(this.IMAGES_DEAD);
-		this.normal_ouch.volume = 0.4;
-		this.death_sound.volume = 0.2;
+		this.normal_ouch.volume = 0.2;
+		this.death_sound.volume = 0.4;
 		this.applyGravity();
 		this.animate();
 	}
