@@ -1,8 +1,12 @@
 body {
+    height: 100vh;
     margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: url('img/body_background/desert-cartoon.jpg') no-repeat;
+    background-size: cover;
+    color: #fff;
 }
 canvas {
     background-color: #000;

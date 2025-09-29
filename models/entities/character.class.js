@@ -183,7 +183,7 @@ class Character extends MovableObject {
 			this.otherDirection = false;
 			this.moveRight();
 			if (!this.isAboveGround()) {
-				if (!this.world.mute) {
+				if (!this.world.muteButton.getMuteState()) {
 					this.walking_sound.play();
 				}
 			}
@@ -193,7 +193,7 @@ class Character extends MovableObject {
 			this.otherDirection = true;
 			this.moveLeft();
 			if (!this.isAboveGround()) {
-				if (!this.world.mute) {
+				if (!this.world.muteButton.getMuteState()) {
 					this.walking_sound.play();
 				}
 			}

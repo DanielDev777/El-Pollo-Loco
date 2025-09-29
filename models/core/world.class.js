@@ -9,16 +9,14 @@ class World {
 	enemyHealthBar = new HealthBar(800, "enemy");
 	coinBar = new CoinBar();
 	hotSauceBar = new HotSauceBar();
-	muteButton = new MuteButton();
-	fullScreenButton = new FullScreenButton();
+	muteButton;
+	fullScreenButton;
 	thrownBottles = [];
 	gameDone = false;
 	frameCount = 0;
 	gameWonTriggered = false;
-	mute = false;
 	squash_sound = new Audio("audio/squash.mp3");
 	lastBossHitTime = 0;
-	fullscreen = false;
 
 	constructor(canvas, keyboard) {
 		this.ctx = canvas.getContext("2d");
@@ -31,9 +29,11 @@ class World {
 		this.specialMoves = [];
 		this.intervals = [];
 		this.squash_sound.volume = 0.1;
+		this.muteButton = new MuteButton();
+		this.fullScreenButton = new FullScreenButton(canvas);
+		this.fullScreenButton.setMuteButtonReference(this.muteButton);
 		this.setWorld();
 		this.setupButtons();
-		this.setupFullscreenListener();
 		this.run();
 	}
 
@@ -95,95 +95,44 @@ class World {
 	}
 
 	setupCanvasClickHandler() {
-    this.canvas.addEventListener('click', (event) => {
-        const rect = this.canvas.getBoundingClientRect();
-        let mouseX = event.clientX - rect.left;
-        let mouseY = event.clientY - rect.top;
-        
-        if (this.fullscreen) {
-            const canvasAspectRatio = 720 / 480;
-            const screenAspectRatio = rect.width / rect.height;
+        this.canvas.addEventListener('click', (event) => {
+            const rect = this.canvas.getBoundingClientRect();
+            let mouseX = event.clientX - rect.left;
+            let mouseY = event.clientY - rect.top;
             
-            if (screenAspectRatio > canvasAspectRatio) {
-                const scaledWidth = rect.height * canvasAspectRatio;
-                const offsetX = (rect.width - scaledWidth) / 2;
-                mouseX = (mouseX - offsetX + 100) * (720 / scaledWidth);
-                mouseY = mouseY * (480 / rect.height);
-            } else {
-                const scaledHeight = rect.width / canvasAspectRatio;
-                const offsetY = (rect.height - scaledHeight) / 2;
-                mouseX = (mouseX + 100) * (720 / rect.width);
-                mouseY = (mouseY - offsetY) * (480 / scaledHeight);
+            if (this.fullScreenButton.getFullscreenState()) {
+                const canvasAspectRatio = 720 / 480;
+                const screenAspectRatio = rect.width / rect.height;
+                
+                if (screenAspectRatio > canvasAspectRatio) {
+                    const scaledWidth = rect.height * canvasAspectRatio;
+                    const offsetX = (rect.width - scaledWidth) / 2;
+                    mouseX = (mouseX - offsetX + 100) * (720 / scaledWidth);
+                    mouseY = mouseY * (480 / rect.height);
+                } else {
+                    const scaledHeight = rect.width / canvasAspectRatio;
+                    const offsetY = (rect.height - scaledHeight) / 2;
+                    mouseX = (mouseX + 100) * (720 / rect.width);
+                    mouseY = (mouseY - offsetY) * (480 / scaledHeight);
+                }
             }
-        }
 
-        if (this.muteButton.isClicked(mouseX, mouseY)) {
-            this.toggleMute();
-        }
+            if (this.muteButton.isClicked(mouseX, mouseY)) {
+                this.muteButton.toggle();
+            }
 
-        if (this.fullScreenButton.isClicked(mouseX, mouseY)) {
-            this.toggleFullscreen();
-        }
-    });
-}
-
-	toggleFullscreen() {
-		if (!document.fullscreenElement) {
-			this.enterFullscreen();
-		} else {
-			this.exitFullscreen();
-		}
-	}
-
-	async enterFullscreen() {
-		try {
-			await this.canvas.requestFullscreen();
-			console.log("Entered fullscreen:", document.fullscreenElement);
-		} catch (err) {
-			console.error("Error entering fullscreen:", err);
-		}
-	}
-
-	async exitFullscreen() {
-        console.log('HELLO');
-        
-		try {
-			await document.exitFullscreen();
-			console.log("Exited fullscreen:", document.fullscreenElement);
-		} catch (err) {
-			console.error("Error exiting fullscreen:", err);
-		}
-	}
-
-    setupFullscreenListener() {
-        document.addEventListener('fullscreenchange', () => {
-            this.fullscreen = !!document.fullscreenElement;
-            this.updateButtonPositions();
-            this.fullScreenButton.updateImage(this.fullscreen);
+            if (this.fullScreenButton.isClicked(mouseX, mouseY)) {
+                this.fullScreenButton.toggle();
+            }
         });
     }
 
-    updateButtonPositions() {
-        this.setButtonProperties(this.muteButton, 20, 420, 50);
-        this.setButtonProperties(this.fullScreenButton, 730, 420, 50);
-    }
 
-    setButtonProperties(button, x, y, size) {
-        button.x = x;
-        button.y = y;
-        button.width = size;
-        button.height = size;
-    }
-
-	toggleMute() {
-		this.mute = !this.mute;
-		this.muteButton.updateImage(this.mute);
-	}
 
 	checkGameConditions() {
 		let endboss = this.level.enemies.find((obj) => obj instanceof Endboss);
 		if (this.character.health <= 0) {
-			if (!this.mute) {
+			if (!this.muteButton.getMuteState()) {
 				this.character.death_sound.play();
 			}
 			this.gameDone = true;
@@ -200,7 +149,7 @@ class World {
 			this.level.enemies.forEach((enemy) => {
 				if (enemy.isColliding(specialMove) && enemy instanceof Endboss) {
 					enemy.health = 0;
-					if (!this.mute) {
+					if (!this.muteButton.getMuteState()) {
 						enemy.big_hit_sound.play();
 					}
 				}
@@ -252,7 +201,7 @@ class World {
 	playerJumpsOnChicken() {
 		this.level.enemies.forEach((enemy) => {
 			if (this.checkPlayerJumpOnChicken(enemy)) {
-				if (!this.mute && !enemy.isDead()) {
+				if (!this.muteButton.getMuteState() && !enemy.isDead()) {
 					this.squash_sound.play();
 				}
 				enemy.health = 0;
@@ -292,7 +241,7 @@ class World {
 	}
 
 	characterGetsHitByChicken() {
-		if (!this.mute) {
+		if (!this.muteButton.getMuteState()) {
 			this.character.normal_ouch.play();
 		}
 		this.character.hit(5);
@@ -302,7 +251,7 @@ class World {
 		const currentTime = Date.now();
 		const bossCooldown = 2000;
 		if (currentTime - this.lastBossHitTime >= bossCooldown) {
-			if (!this.mute) {
+			if (!this.muteButton.getMuteState()) {
 				this.character.big_ouch.play();
 			}
 			this.character.hit(30);
