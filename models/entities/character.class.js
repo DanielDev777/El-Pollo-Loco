@@ -60,6 +60,9 @@ class Character extends MovableObject {
 		"img/2_character_pepe/5_dead/D-57.png",
 	];
 	walking_sound = new Audio("audio/walking.mp3");
+	normal_ouch = new Audio("audio/normal_ouch.mp3");
+	big_ouch = new Audio("audio/big_ouch.mp3");
+	death_sound = new Audio("audio/death.mp3");
 	world;
 	specialMove;
 	rotation = 0;
@@ -86,6 +89,8 @@ class Character extends MovableObject {
 		this.loadImages(this.IMAGES_JUMPING);
 		this.loadImages(this.IMAGES_HURTING);
 		this.loadImages(this.IMAGES_DEAD);
+		this.normal_ouch.volume = 0.4;
+		this.death_sound.volume = 0.2;
 		this.applyGravity();
 		this.animate();
 	}
@@ -108,17 +113,33 @@ class Character extends MovableObject {
 	}
 
 	throwBottle() {
-		if (this.world && this.world.keyboard && this.world.hotSauceBar.percentage >= 25) {
+		if (
+			this.world &&
+			this.world.keyboard &&
+			this.world.hotSauceBar.percentage >= 25
+		) {
 			let currentDPressed = this.world.keyboard.D;
 			if (currentDPressed && !this.lastDState) {
 				let thrownBottle = new Bottle(this.x + 100);
 				if (this.otherDirection == false) {
-					thrownBottle.throw(this.x + 100, this.actualY + 40, this.world, "right");
+					thrownBottle.throw(
+						this.x + 100,
+						this.actualY + 40,
+						this.world,
+						"right"
+					);
 				} else {
-					thrownBottle.throw(this.x - 100, this.actualY + 40, this.world, "left");
+					thrownBottle.throw(
+						this.x - 100,
+						this.actualY + 40,
+						this.world,
+						"left"
+					);
 				}
 				this.world.thrownBottles.push(thrownBottle);
-				this.world.hotSauceBar.setPercentage(this.world.hotSauceBar.percentage - 25);
+				this.world.hotSauceBar.setPercentage(
+					this.world.hotSauceBar.percentage - 25
+				);
 			}
 		}
 	}
@@ -162,7 +183,9 @@ class Character extends MovableObject {
 			this.otherDirection = false;
 			this.moveRight();
 			if (!this.isAboveGround()) {
-				this.walking_sound.play();
+				if (!this.world.mute) {
+					this.walking_sound.play();
+				}
 			}
 		}
 
@@ -170,7 +193,9 @@ class Character extends MovableObject {
 			this.otherDirection = true;
 			this.moveLeft();
 			if (!this.isAboveGround()) {
-				this.walking_sound.play();
+				if (!this.world.mute) {
+					this.walking_sound.play();
+				}
 			}
 		}
 	}
@@ -293,40 +318,45 @@ class Character extends MovableObject {
 		this.backflipSpeed = this.otherDirection ? -9 : -9;
 	}
 
-playSlowDeathAnimation() {
-    if (this.deathAnimationComplete) return;
-    
-    if (this.deathAnimationCounter % 4 === 0) {
-        const index = Math.floor(this.deathAnimationCounter / 4);
-        if (index < this.IMAGES_DEAD.length) {
-            this.img = this.imageCache[this.IMAGES_DEAD[index]];
-        } else {
-            this.completeDeathAnimation();
-        }
-    }
-    this.deathAnimationCounter++;
-}
+	playSlowDeathAnimation() {
+		if (this.deathAnimationComplete) return;
+		if (this.deathAnimationCounter % 4 === 0) {
+			const index = Math.floor(this.deathAnimationCounter / 4);
+			if (index < this.IMAGES_DEAD.length) {
+				this.img = this.imageCache[this.IMAGES_DEAD[index]];
+			} else {
+				this.completeDeathAnimation();
+			}
+		}
+		this.deathAnimationCounter++;
+	}
 
-completeDeathAnimation() {
-    if (!this.deathAnimationComplete) {
-        this.deathAnimationComplete = true;
-        this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
-        this.world.gameDone = true;
-        dispatchEvent(gameOverEvent);
-    }
-}
+	completeDeathAnimation() {
+		if (!this.deathAnimationComplete) {
+			this.deathAnimationComplete = true;
+			this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
+			this.world.gameDone = true;
+			dispatchEvent(gameOverEvent);
+		}
+	}
 
-  resetCharacter() {
-    this.x = 120;
-    this.y = 135;
-    this.health = 100;
-    this.deathAnimationComplete = false;
-    this.deathAnimationCounter = 0;
-    this.rotation = 0;
-    this.isBackflipping = false;
-    this.speedY = 0;
-    this.lastInputTime = Date.now();
-  }
+	resetCharacter() {
+		this.x = 120;
+		this.y = 135;
+		this.health = 100;
+		this.deathAnimationComplete = false;
+		this.deathAnimationCounter = 0;
+		this.rotation = 0;
+		this.isBackflipping = false;
+		this.speedY = 0;
+		this.lastInputTime = Date.now();
+		this.stopDeathSound();
+	}
+
+	stopDeathSound() {
+		this.death_sound.pause();
+		this.death_sound.currentTime = 0;
+	}
 
 	updateLastInputTime() {
 		if (

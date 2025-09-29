@@ -64,6 +64,9 @@ class Bottle extends CollectibleObject {
     handleBossCollision(enemy) {
         enemy.hit(25);
         this.splash(enemy);
+        if (!this.world.mute) {
+            enemy.bottle_hit.play();
+        }
         this.world.enemyHealthBar.setPercentage(enemy.health);
     }
 

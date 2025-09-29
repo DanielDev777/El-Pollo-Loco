@@ -41,6 +41,8 @@ class Endboss extends MovableObject {
         'img/4_enemie_boss_chicken/5_dead/G25.png',
         'img/4_enemie_boss_chicken/5_dead/G26.png',
     ]
+    bottle_hit = new Audio('audio/bottle_hit.mp3')
+    big_hit_sound = new Audio('audio/big_hit.mp3');
 
     constructor() {
         super().loadImage(this.IMAGES_WALKING[0]);
@@ -49,6 +51,8 @@ class Endboss extends MovableObject {
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURTING);
         this.loadImages(this.IMAGES_DEAD);
+        this.bottle_hit.volume = 0.5;
+        this.big_hit_sound.volume = 1;
         this.animate();
     }
 
@@ -56,7 +60,6 @@ class Endboss extends MovableObject {
         setInterval(() => {
             if (this.isDead()) {
                 this.playDeathAnimation();
-                dispatchEvent(gameWonEvent);
             } else if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURTING);
             } else if (this.readyToFight) {
@@ -70,15 +73,30 @@ class Endboss extends MovableObject {
 
     playDeathAnimation() {
         if (!this.deathAnimationComplete) {
-            this.playAnimation(this.IMAGES_DEAD);
-            this.checkDeathAnimationComplete();
+            this.playSlowDeathAnimation();
         }
     }
 
-    checkDeathAnimationComplete() {
-        const isLastFrame = this.currentImage >= this.IMAGES_DEAD.length - 1;
-        if (isLastFrame) {
+    playSlowDeathAnimation() {
+        if (!this.deathAnimationStarted) {
+            this.deathAnimationStarted = true;
+            this.deathFrameCounter = 0;
+        }
+        if (this.deathFrameCounter % 1 === 0) {
+            const frameIndex = Math.floor(this.deathFrameCounter / 1);
+            if (frameIndex < this.IMAGES_DEAD.length) {
+                this.img = this.imageCache[this.IMAGES_DEAD[frameIndex]];
+            } else {
+                this.completeDeathAnimation();
+            }
+        }
+        this.deathFrameCounter++;
+    }
+
+    completeDeathAnimation() {
+        if (!this.deathEventTriggered) {
             this.deathAnimationComplete = true;
+            this.deathEventTriggered = true;
             this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
         }
     }
@@ -88,11 +106,8 @@ class Endboss extends MovableObject {
             if (this.world) {
                 this.checkPosition();
                 if (this.readyToFight && this.x > 0 && !this.isDead() && this.otherDirection === false) {
-                    console.log('ATTACKING LEFT');
-                    
                     this.moveLeft();
                 } else if (this.readyToFight && !this.isDead() && this.otherDirection === true) {
-                    console.log('ATTACKING RIGHT');
                     this.moveRight(true);
                 }
             }
