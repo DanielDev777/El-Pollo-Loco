@@ -11,6 +11,7 @@ let rightBtn = document.getElementById('right-btn');
 let upBtn = document.getElementById('up-btn');
 let throwBtn = document.getElementById('throw-btn');
 let beamBtn = document.getElementById('beam-btn');
+let portraitMessage = document.getElementById('portrait-message');
 
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
@@ -119,6 +120,33 @@ document.addEventListener('keyup', (e) => {
 });
 
 // Mobile //
+const handleOrientationChange = () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const portraitMessage = document.getElementById('portrait-message');
+        
+        if (isPortrait && portraitMessage) {
+            portraitMessage.style.display = 'flex';
+        } else if (portraitMessage) {
+            portraitMessage.style.display = 'none';
+        }
+    }
+};
+
+// Initialize portrait message on page load
+document.addEventListener('DOMContentLoaded', () => {
+    handleOrientationChange();
+});
+
+// Handle orientation changes
+window.addEventListener('orientationchange', () => {
+    setTimeout(handleOrientationChange, 100);
+});
+
+window.addEventListener('resize', handleOrientationChange);
+
 leftBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
     keyboard.LEFT = true;
