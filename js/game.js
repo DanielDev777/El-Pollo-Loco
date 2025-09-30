@@ -6,6 +6,11 @@ let restartBtn = document.getElementById('restart-btn');
 let gameOverEvent = new Event('game-over');
 let gameWonEvent = new Event('game-won');
 let overlay = document.getElementById('overlay-img');
+let leftBtn = document.getElementById('left-btn');
+let rightBtn = document.getElementById('right-btn');
+let upBtn = document.getElementById('up-btn');
+let throwBtn = document.getElementById('throw-btn');
+let beamBtn = document.getElementById('beam-btn');
 
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
@@ -112,3 +117,46 @@ document.addEventListener('keyup', (e) => {
             break;
     }
 });
+
+// Mobile //
+leftBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keyboard.LEFT = true;
+});
+leftBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keyboard.LEFT = false;
+});
+rightBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keyboard.RIGHT = true;
+});
+rightBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keyboard.RIGHT = false;
+});
+upBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keyboard.SPACE = true;
+});
+upBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keyboard.SPACE = false;
+});
+throwBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keyboard.D = true;
+});
+throwBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keyboard.D = false;
+});
+beamBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keyboard.F = true;
+});
+beamBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keyboard.F = false;
+});
+// Mobile //

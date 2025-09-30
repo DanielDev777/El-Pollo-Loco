@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 60" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Energieball -->
+  <circle cx="30" cy="30" r="12" />
+  <circle cx="30" cy="30" r="18" stroke-dasharray="5 5" /> <!-- Aura -->
+
+  <!-- Strahl-Außenkanten (verjüngend, leicht wellig) -->
+  <path d="M42 18 Q70 10, 120 15 Q150 18, 170 25" fill="#fff" />
+  <path d="M42 42 Q70 50, 120 45 Q150 42, 170 35" fill="#fff" />
+
+  <!-- Innere Energie-Wellen -->
+  <path d="M45 30 Q80 20, 140 28 Q160 30, 175 28" stroke-dasharray="6 6" fill="#fff" />
+  <path d="M45 30 Q80 40, 140 32 Q160 30, 175 32" stroke-dasharray="6 6" fill="#fff" />
+
+  <!-- Dynamische Energie-Funken um den Ball -->
+  <path d="M18 18 L10 10" fill="#fff" />
+  <path d="M42 18 L50 10" fill="#fff" />
+  <path d="M18 42 L10 50" fill="#fff" />
+  <path d="M42 42 L50 50" fill="#fff" />
+</svg>

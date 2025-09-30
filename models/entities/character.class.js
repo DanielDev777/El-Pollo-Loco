@@ -90,6 +90,7 @@ class Character extends MovableObject {
 		this.loadImages(this.IMAGES_HURTING);
 		this.loadImages(this.IMAGES_DEAD);
 		this.normal_ouch.volume = 0.2;
+		this.big_ouch.volume = 0.3;
 		this.death_sound.volume = 0.4;
 		this.applyGravity();
 		this.animate();
@@ -313,7 +314,7 @@ class Character extends MovableObject {
 	}
 
 	backflip() {
-		this.speedY = 25;
+		this.speedY = 15;
 		this.isBackflipping = true;
 		this.backflipSpeed = this.otherDirection ? -9 : -9;
 	}

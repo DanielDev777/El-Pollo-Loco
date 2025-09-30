@@ -5,6 +5,7 @@ class Endboss extends MovableObject {
     y = 50;
     readyToFight = false;
     speed = 10;
+    movementIntervalStarted = false;
     IMAGES_WALKING = [
         'img/4_enemie_boss_chicken/1_walk/G1.png',
         'img/4_enemie_boss_chicken/1_walk/G2.png',
@@ -57,18 +58,26 @@ class Endboss extends MovableObject {
     }
 
     animate() {
+        let i = 0;
         setInterval(() => {
             if (this.isDead()) {
                 this.playDeathAnimation();
             } else if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURTING);
             } else if (this.readyToFight) {
-                this.playAnimation(this.IMAGES_WALKING);
-            } else {
-                this.playAnimation(this.IMAGES_ALERT);
+                this.prepareForAttack(i);
+                i++;
             }
         }, 200);
-        this.attack();
+    }
+    
+    prepareForAttack(i) {
+        if (i < 10) {
+            this.playAnimation(this.IMAGES_ALERT);
+        } else {
+            this.playAnimation(this.IMAGES_WALKING);
+            this.attack();
+        }
     }
 
     playDeathAnimation() {
@@ -102,16 +111,19 @@ class Endboss extends MovableObject {
     }
 
     attack() {
-        setInterval(() => {
-            if (this.world) {
-                this.checkPosition();
-                if (this.readyToFight && this.x > 0 && !this.isDead() && this.otherDirection === false) {
-                    this.moveLeft();
-                } else if (this.readyToFight && !this.isDead() && this.otherDirection === true) {
-                    this.moveRight(true);
+        if (!this.movementIntervalStarted) {
+            this.movementIntervalStarted = true;
+            setInterval(() => {
+                if (this.world) {
+                    this.checkPosition();
+                    if (this.readyToFight && this.x > 0 && !this.isDead() && this.otherDirection === false) {
+                        this.moveLeft();
+                    } else if (this.readyToFight && !this.isDead() && this.otherDirection === true) {
+                        this.moveRight(true);
+                    }
                 }
-            }
-        }, 1000 / 60);
+            }, 1000 / 60);
+        }
     }
 
     checkPosition() {

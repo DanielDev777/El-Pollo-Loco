@@ -57,6 +57,12 @@ class FullScreenButton extends DrawableObject {
         });
     }
 
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               ('ontouchstart' in window) || 
+               (navigator.maxTouchPoints > 0);
+    }
+
     setMuteButtonReference(muteButton) {
         this.muteButton = muteButton;
     }

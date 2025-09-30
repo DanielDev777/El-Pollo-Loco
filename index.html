@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="img/icons/favicon.PNG">
     <title>El Pollo Loco</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,9 +14,30 @@
         <img id="overlay-img" src="img/9_intro_outro_screens/start/startscreen_1.png">
         <canvas id="canvas" width="800" height="480">
         </canvas>
+        <div class="control-panel">
+            <div class="control-move">
+                <button id="left-btn" class="bg-orange control-btn">
+                    <img src="./img/icons/left.svg">
+                </button>
+                <button id="right-btn" class="bg-orange control-btn">
+                    <img src="./img/icons/right.svg">
+                </button>
+            </div>
+            <div class="control-action">
+                <button id="up-btn" class="bg-orange control-btn">
+                    <img src="./img/icons/up.svg">
+                </button>
+                <button id="throw-btn" class="bg-orange control-btn">
+                    <img src="./img/icons/bottle.svg">
+                </button>
+                <button id="beam-btn" class="bg-orange control-btn">
+                    <img src="./img/icons/beam.svg">
+                </button>
+            </div>
+        </div>
     </div>
-    <button id="start-btn">Start Game</button>
-    <button id="restart-btn" class="d-none">Restart</button>
+    <button id="start-btn" class="bg-orange">Start Game</button>
+    <button id="restart-btn" class="d-none bg-orange">Restart</button>
 
     <div class="instructions">
         <h2>Instructions</h2>

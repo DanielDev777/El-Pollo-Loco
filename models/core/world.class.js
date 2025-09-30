@@ -168,7 +168,7 @@ class World {
 
 	checkPlayerPosition() {
 		let boss = this.level.enemies.find((obj) => obj instanceof Endboss);
-		if (this.character.x >= 2000 && this.enemyHealthBar.x !== 500) {
+		if (this.character.x >= 1900 && this.enemyHealthBar.x !== 500) {
 			this.updateEnemyHealthBarPosition();
 			boss.readyToFight = true;
 		}
@@ -232,7 +232,7 @@ class World {
 	}
 
 	characterGetsHit(enemy) {
-		if (enemy instanceof Chicken) {
+		if (enemy instanceof Chicken && !this.gameDone) {
 			this.characterGetsHitByChicken();
 		} else if (enemy instanceof Endboss) {
 			this.characterGetsHitByBoss();
@@ -294,7 +294,9 @@ class World {
 		this.addToMap(this.hotSauceBar);
 		this.addToMap(this.enemyHealthBar);
 		this.addToMap(this.muteButton);
-		this.addToMap(this.fullScreenButton);
+		if (!this.fullScreenButton.isMobileDevice()) {
+			this.addToMap(this.fullScreenButton);
+		}
 	}
 
 	clearCanvas() {
