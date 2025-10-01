@@ -258,14 +258,17 @@ class World {
 		currentTarget = Math.max(rightBoundary, Math.min(leftBoundary, currentTarget));
 		
 		const distance = currentTarget - this.camera_x;
-		const moveSpeed = 6; // Slightly slower for smoother feel
+		
+		// Adaptive speed: faster when character is moving, slower when standing
+		const isCharacterMoving = this.keyboard.LEFT || this.keyboard.RIGHT;
+		const moveSpeed = isCharacterMoving ? 15 : 6;
 		
 		if (Math.abs(distance) <= moveSpeed) {
 			// Close enough, snap to target and end transition
 			this.camera_x = currentTarget;
 			this.camera_transitioning = false;
 		} else {
-			// Move at constant speed towards current target
+			// Move at adaptive speed towards current target
 			this.camera_x += distance > 0 ? moveSpeed : -moveSpeed;
 		}
 		
