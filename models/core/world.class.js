@@ -251,40 +251,19 @@ class World {
 	}
 
 	handleCameraTransition() {
-		// Recalculate target in case character moved during transition
 		let currentTarget = this.calculateTargetPosition(this.camera_mode);
 		const leftBoundary = 0;
 		const rightBoundary = -(2800 - this.canvas.width);
 		currentTarget = Math.max(rightBoundary, Math.min(leftBoundary, currentTarget));
 		
 		const distance = currentTarget - this.camera_x;
-		
-		// Direction-aware adaptive speed
 		const isCharacterMoving = this.keyboard.LEFT || this.keyboard.RIGHT;
-		let moveSpeed;
-		
-		if (!isCharacterMoving) {
-			moveSpeed = 10; // Slow and smooth when standing
-		} else {
-			// Different speeds based on transition direction and character movement
-			if (this.camera_mode === 'left' && this.keyboard.LEFT) {
-				// Switching to left while moving left - needs faster catch-up
-				moveSpeed = 25;
-			} else if (this.camera_mode === 'right' && this.keyboard.RIGHT) {
-				// Switching to right while moving right - moderate speed
-				moveSpeed = 25;
-			} else {
-				// Default moving speed
-				moveSpeed = 18;
-			}
-		}
+		const moveSpeed = isCharacterMoving ? 25 : 10;
 		
 		if (Math.abs(distance) <= moveSpeed) {
-			// Close enough, snap to target and end transition
 			this.camera_x = currentTarget;
 			this.camera_transitioning = false;
 		} else {
-			// Move at adaptive speed towards current target
 			this.camera_x += distance > 0 ? moveSpeed : -moveSpeed;
 		}
 		
