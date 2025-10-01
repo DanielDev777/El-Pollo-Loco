@@ -2,7 +2,7 @@ html {
     /* height: 100%; */
 }
 body {
-    height: fit-content;
+    min-height: 100vh;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -117,6 +117,12 @@ h1 {
     #restart-btn {
         position: absolute;
         top: 200px;
+    }
+}
+@media (max-width: 575px) {
+    .control-btn img {
+        height: 25px;
+        width: 25px;
     }
 }
 @media only screen and (max-height: 480px) {

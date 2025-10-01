@@ -71,15 +71,10 @@ class Character extends MovableObject {
 	backflipReady = false;
 	lastSpaceState = false;
 	lastDState = false;
-	jumpAnimationPlayed = false;
-	jumpAnimationIndex = 0;
-	jumpAnimationFrameCounter = 0;
-	deathAnimationComplete = false;
-	deathAnimationCounter = 0;
-	deathAnimationComplete = false;
-	idleAnimationCounter = 0;
-	idleAnimationIndex = 0;
 	lastInputTime = Date.now();
+	animationManager;
+	movementController;
+	actionHandler;
 
 	constructor() {
 		super().loadImage("img/2_character_pepe/2_walk/W-21.png");
@@ -92,249 +87,39 @@ class Character extends MovableObject {
 		this.normal_ouch.volume = 0.2;
 		this.big_ouch.volume = 0.3;
 		this.death_sound.volume = 0.4;
+		this.initializeManagers();
 		this.applyGravity();
 		this.animate();
 	}
 
+	initializeManagers() {
+		this.animationManager = new CharacterAnimationManager(this);
+		this.movementController = new CharacterMovementController(this);
+		this.actionHandler = new CharacterActionHandler(this);
+	}
+
 	animate() {
 		setInterval(() => {
-			this.handleMovement();
-			this.handleJumping();
-			this.throwBottle();
-			this.updateBackflip();
-			this.resetBackflipOnLanding();
+			this.movementController.handleMovement();
+			this.movementController.handleJumping();
+			this.actionHandler.throwBottle();
+			this.movementController.updateBackflip();
+			this.movementController.resetBackflipOnLanding();
 			this.lastSpaceState = this.world.keyboard.SPACE;
 			this.lastDState = this.world.keyboard.D;
-			this.updateLastInputTime();
-			this.triggerSpecialMove();
+			this.movementController.updateLastInputTime();
+			this.actionHandler.triggerSpecialMove();
 		}, 1000 / 60);
 		setInterval(() => {
-			this.handleAnimations();
+			this.animationManager.handleAnimations();
 		}, 50);
 	}
 
-	throwBottle() {
-		if (this.world && this.world.keyboard && this.world.hotSauceBar.percentage >= 25 && !this.world.gameDone) {
-			let currentDPressed = this.world.keyboard.D;
-			if (currentDPressed && !this.lastDState) {
-				let thrownBottle = new Bottle(this.x + 100);
-				if (this.otherDirection == false) {
-					thrownBottle.throw(this.x + 100, this.actualY + 40, this.world, "right");
-				} else {
-					thrownBottle.throw(this.x - 100, this.actualY + 40, this.world, "left");
-				}
-				this.world.thrownBottles.push(thrownBottle);
-				this.world.hotSauceBar.setPercentage(
-					this.world.hotSauceBar.percentage - 25
-				);
-			}
-		}
-	}
-
-	triggerSpecialMove() {
-		if (this.world.coinBar.percentage === 100 && this.world.keyboard.F && !this.world.gameDone) {
-			const moveX = this.otherDirection ? this.x - 420 : this.x + 80;
-			this.specialMove = new SpecialMove(moveX, this.y + 100, this.otherDirection);
-			this.world.specialMoves.push(this.specialMove);
-			this.world.coinBar.setPercentage(0);
-		}
-	}
-
-	handleAnimations() {
-		if (this.isDead()) {
-			this.playSlowDeathAnimation();
-		} else if (this.isHurt()) {
-			this.playAnimation(this.IMAGES_HURTING);
-		} else if (this.isAboveGround()) {
-			this.playJumpAnimation();
-		} else if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT) && this.world.gameDone === false) {
-			this.playAnimation(this.IMAGES_WALKING);
-		} else {
-			this.playIdleAnimation();
-		}
-	}
-
-	handleMovement() {
-		this.handleRight();
-		this.handleLeft();
-	}
-
-	handleRight() {
-		if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x && !this.world.gameDone) {
-			this.otherDirection = false;
-			this.moveRight();
-			if (!this.isAboveGround()) {
-				if (!this.world.muteButton.getMuteState()) {
-					this.walking_sound.play();
-				}
-			}
-		}
-	}
-
-	handleLeft() {
-		if (this.world.keyboard.LEFT && this.x > 0 && !this.world.gameDone) {
-			this.otherDirection = true;
-			this.moveLeft();
-			if (!this.isAboveGround()) {
-				if (!this.world.muteButton.getMuteState()) {
-					this.walking_sound.play();
-				}
-			}
-		}
-	}
-
-	handleJumping() {
-		if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-			this.jump();
-			this.backflipReady = true;
-			this.jumpAnimationPlayed = false;
-			this.jumpAnimationIndex = 0;
-			this.jumpAnimationFrameCounter = 0;
-		}
-		this.checkBackflipReady();
-	}
-
-	checkBackflipReady() {
-		if (this.isAboveGround()) {
-			if (this.world.keyboard.SPACE && !this.lastSpaceState && this.backflipReady) {
-				this.backflip();
-				this.backflipReady = false;
-			}
-		}
-	}
-
-	updateBackflip() {
-		if (this.isBackflipping) {
-			this.rotation += this.backflipSpeed;
-			if (this.isBackflipComplete()) {
-				this.stopBackflip();
-			}
-		}
-	}
-
-	resetBackflipOnLanding() {
-		if (!this.isAboveGround() && this.speedY <= 0) {
-			this.backflipReady = false;
-			if (this.isBackflipping) {
-				this.stopBackflip();
-			}
-		}
-	}
-
-	playJumpAnimation() {
-		if (!this.jumpAnimationPlayed) {
-			this.jumpAnimationFrameCounter++;
-			if (this.jumpAnimationFrameCounter >= 2) {
-				this.jumpAnimationFrameCounter = 0;
-				if (this.jumpAnimationIndex < this.IMAGES_JUMPING.length - 1) {
-					this.jumpAnimationIndex++;
-				} else {
-					this.jumpAnimationPlayed = true;
-				}
-			}
-			let path = this.IMAGES_JUMPING[this.jumpAnimationIndex];
-			this.img = this.imageCache[path];
-		} else {
-			let path = this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1];
-			this.img = this.imageCache[path];
-		}
-	}
-
-	shouldPlayIdleAnimation() {
-		return (!this.isAboveGround() && !this.world.keyboard.RIGHT && !this.world.keyboard.LEFT && !this.world.keyboard.SPACE);
-	}
-
-	getIdleImages() {
-		const idleDuration = Date.now() - this.lastInputTime;
-		return idleDuration >= 5000 ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
-	}
-
-	resetIdleAnimationCounters() {
-		this.idleAnimationCounter = 0;
-		this.idleAnimationIndex = 0;
-	}
-
-	advanceIdleAnimation(images) {
-		this.idleAnimationCounter++;
-		if (this.idleAnimationCounter >= 8) {
-			this.idleAnimationCounter = 0;
-			this.idleAnimationIndex = (this.idleAnimationIndex + 1) % images.length;
-		}
-		if (this.idleAnimationIndex >= images.length) {
-			this.idleAnimationIndex = 0;
-		}
-	}
-
-	playIdleAnimation() {
-		if (this.shouldPlayIdleAnimation()) {
-			const images = this.getIdleImages();
-			this.advanceIdleAnimation(images);
-			const path = images[this.idleAnimationIndex];
-			this.img = this.imageCache[path];
-		} else {
-			this.resetIdleAnimationCounters();
-		}
-	}
-
-	isBackflipComplete() {
-		return this.rotation <= -360;
-	}
-
-	stopBackflip() {
-		this.rotation = 0;
-		this.isBackflipping = false;
-		this.backflipSpeed = 0;
-	}
-
 	backflip() {
-		this.speedY = 15;
-		this.isBackflipping = true;
-		this.backflipSpeed = this.otherDirection ? -9 : -9;
-	}
-
-	playSlowDeathAnimation() {
-		if (this.deathAnimationComplete) return;
-		if (this.deathAnimationCounter % 4 === 0) {
-			const index = Math.floor(this.deathAnimationCounter / 4);
-			if (index < this.IMAGES_DEAD.length) {
-				this.img = this.imageCache[this.IMAGES_DEAD[index]];
-			} else {
-				this.completeDeathAnimation();
-			}
-		}
-		this.deathAnimationCounter++;
-	}
-
-	completeDeathAnimation() {
-		if (!this.deathAnimationComplete) {
-			this.deathAnimationComplete = true;
-			this.img = this.imageCache[this.IMAGES_DEAD[this.IMAGES_DEAD.length - 1]];
-			this.world.gameDone = true;
-			dispatchEvent(gameOverEvent);
-		}
+		this.movementController.backflip();
 	}
 
 	resetCharacter() {
-		this.x = 120;
-		this.y = 135;
-		this.health = 100;
-		this.deathAnimationComplete = false;
-		this.deathAnimationCounter = 0;
-		this.rotation = 0;
-		this.isBackflipping = false;
-		this.speedY = 0;
-		this.lastInputTime = Date.now();
-		this.stopDeathSound();
-	}
-
-	stopDeathSound() {
-		this.death_sound.pause();
-		this.death_sound.currentTime = 0;
-	}
-
-	updateLastInputTime() {
-		if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.SPACE || this.world.keyboard.D) {
-			this.lastInputTime = Date.now();
-		}
+		this.actionHandler.resetCharacter();
 	}
 }
