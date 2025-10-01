@@ -17,4 +17,5 @@ if available use bootstrap 5 for styling
 always check if function exists before calling it
 use semantic HTML5 elements
 use descriptive variable and function names
-functions should not be longer than 14 lines
+functions and methods should not be longer than 14 lines
+If a function will be longer than 14 lines break it into smaller pieces

@@ -31,19 +31,11 @@ class FullScreenButton extends DrawableObject {
     }
 
     async enterFullscreen() {
-        try {
-            await this.canvas.requestFullscreen();
-        } catch (err) {
-            console.error('Error entering fullscreen:', err);
-        }
+        await this.canvas.requestFullscreen();
     }
 
     async exitFullscreen() {
-        try {
-            await document.exitFullscreen();
-        } catch (err) {
-            console.error('Error exiting fullscreen:', err);
-        }
+        await document.exitFullscreen();
     }
 
     setupFullscreenListener() {

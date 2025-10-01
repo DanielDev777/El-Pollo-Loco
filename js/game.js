@@ -65,7 +65,6 @@ function resetGameState() {
     overlay.src = '';
     startBtn.style.display = 'block';
     restartBtn.classList.add('d-none');
-    
 }
 
 document.addEventListener('keydown', (e) => {
@@ -83,6 +82,7 @@ document.addEventListener('keydown', (e) => {
             keyboard.LEFT = true;
             break;
         case 'Space':
+            e.preventDefault();
             keyboard.SPACE = true;
             break;
         case 'KeyD':
@@ -108,6 +108,7 @@ document.addEventListener('keyup', (e) => {
             keyboard.LEFT = false;
             break;
         case 'Space':
+            e.preventDefault();
             keyboard.SPACE = false;
             break;
         case 'KeyD':

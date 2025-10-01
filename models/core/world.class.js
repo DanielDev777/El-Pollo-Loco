@@ -90,44 +90,82 @@ class World {
 		this.characterCollectsCoin();
 	}
 
-	setupButtons() {
-		this.setupCanvasClickHandler();
-	}
+    setupButtons() {
+        this.setupCanvasClickHandler();
+    }
 
-	setupCanvasClickHandler() {
+    setupCanvasClickHandler() {
         this.canvas.addEventListener('click', (event) => {
-            const rect = this.canvas.getBoundingClientRect();
-            let mouseX = event.clientX - rect.left;
-            let mouseY = event.clientY - rect.top;
-            
-            if (this.fullScreenButton.getFullscreenState()) {
-                const canvasAspectRatio = 720 / 480;
-                const screenAspectRatio = rect.width / rect.height;
-                
-                if (screenAspectRatio > canvasAspectRatio) {
-                    const scaledWidth = rect.height * canvasAspectRatio;
-                    const offsetX = (rect.width - scaledWidth) / 2;
-                    mouseX = (mouseX - offsetX + 100) * (720 / scaledWidth);
-                    mouseY = mouseY * (480 / rect.height);
-                } else {
-                    const scaledHeight = rect.width / canvasAspectRatio;
-                    const offsetY = (rect.height - scaledHeight) / 2;
-                    mouseX = (mouseX + 100) * (720 / rect.width);
-                    mouseY = (mouseY - offsetY) * (480 / scaledHeight);
-                }
-            }
-
-            if (this.muteButton.isClicked(mouseX, mouseY)) {
-                this.muteButton.toggle();
-            }
-
-            if (this.fullScreenButton.isClicked(mouseX, mouseY)) {
-                this.fullScreenButton.toggle();
-            }
+            const { mouseX, mouseY } = this.getMouseCoordinates(event);
+            this.handleButtonClicks(mouseX, mouseY);
         });
     }
 
+    getMouseCoordinates(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        let mouseX = event.clientX - rect.left;
+        let mouseY = event.clientY - rect.top;
 
+        if (this.fullScreenButton.getFullscreenState()) {
+            return this.transformFullscreenCoordinates(mouseX, mouseY, rect);
+        }
+
+        return { mouseX, mouseY };
+    }
+
+    transformFullscreenCoordinates(mouseX, mouseY, rect) {
+        const canvasAspectRatio = 720 / 480;
+        const screenAspectRatio = rect.width / rect.height;
+        
+        if (screenAspectRatio > canvasAspectRatio) {
+            return this.transformWideScreenCoordinates(mouseX, mouseY, rect, canvasAspectRatio);
+        } else {
+            return this.transformTallScreenCoordinates(mouseX, mouseY, rect, canvasAspectRatio);
+        }
+    }
+
+    transformWideScreenCoordinates(mouseX, mouseY, rect, canvasAspectRatio) {
+        const scaledWidth = rect.height * canvasAspectRatio;
+        const offsetX = (rect.width - scaledWidth) / 2;
+        
+        mouseX = (mouseX - offsetX) * (720 / scaledWidth);
+        mouseY = mouseY * (480 / rect.height);
+        
+        return { mouseX, mouseY };
+    }
+
+    transformTallScreenCoordinates(mouseX, mouseY, rect, canvasAspectRatio) {
+        const scaledHeight = rect.width / canvasAspectRatio;
+        const offsetY = (rect.height - scaledHeight) / 2;
+        
+        mouseX = mouseX * (720 / rect.width);
+        mouseY = (mouseY - offsetY) * (480 / scaledHeight);
+        
+        return { mouseX, mouseY };
+    }
+
+    handleButtonClicks(mouseX, mouseY) {
+        this.handleMuteButtonClick(mouseX, mouseY);
+        this.handleFullscreenButtonClick(mouseX, mouseY);
+    }
+
+    handleMuteButtonClick(mouseX, mouseY) {
+        if (this.muteButton.isClicked && this.muteButton.isClicked(mouseX, mouseY)) {
+            this.muteButton.toggle();
+        }
+    }
+
+    handleFullscreenButtonClick(mouseX, mouseY) {
+        let adjustedMouseX = mouseX;
+        
+        if (this.fullScreenButton.getFullscreenState()) {
+            adjustedMouseX = mouseX + 70;
+        }
+
+        if (this.fullScreenButton.isClicked && this.fullScreenButton.isClicked(adjustedMouseX, mouseY)) {
+            this.fullScreenButton.toggle();
+        }
+    }
 
 	checkGameConditions() {
 		let endboss = this.level.enemies.find((obj) => obj instanceof Endboss);

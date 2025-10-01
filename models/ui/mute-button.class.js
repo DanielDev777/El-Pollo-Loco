@@ -12,15 +12,24 @@ class MuteButton extends DrawableObject {
             'img/icons/mute.svg',
             'img/icons/sound.svg'
         ]);
+        this.getLocalMuteState();
+    }
+
+    getLocalMuteState() {
+        if (localStorage.getItem("muted")) {
+            this.isMuted = localStorage.getItem("muted");
+            this.updateImage(this.isMuted);
+        }
     }
 
     updateImage(isMuted) {
-        const imagePath = isMuted ? 'img/icons/mute.svg' : 'img/icons/sound.svg';
+        const imagePath = (isMuted === 'true' || isMuted === true)  ? 'img/icons/mute.svg' : 'img/icons/sound.svg';
         this.img = this.imageCache[imagePath];
     }
 
     toggle() {
         this.isMuted = !this.isMuted;
+        localStorage.setItem("muted", this.isMuted);
         this.updateImage(this.isMuted);
         return this.isMuted;
     }
