@@ -16,8 +16,9 @@ class MuteButton extends DrawableObject {
     }
 
     getLocalMuteState() {
-        if (localStorage.getItem("muted")) {
-            this.isMuted = localStorage.getItem("muted");
+        const savedMuteState = localStorage.getItem("muted");
+        if (savedMuteState !== null) {
+            this.isMuted = savedMuteState === 'true';
             this.updateImage(this.isMuted);
         }
     }
@@ -29,7 +30,7 @@ class MuteButton extends DrawableObject {
 
     toggle() {
         this.isMuted = !this.isMuted;
-        localStorage.setItem("muted", this.isMuted);
+        localStorage.setItem("muted", this.isMuted.toString());
         this.updateImage(this.isMuted);
         return this.isMuted;
     }
@@ -39,7 +40,8 @@ class MuteButton extends DrawableObject {
     }
 
     setMuteState(muteState) {
-        this.isMuted = muteState;
+        this.isMuted = Boolean(muteState);
+        localStorage.setItem("muted", this.isMuted.toString());
         this.updateImage(this.isMuted);
     }
 
