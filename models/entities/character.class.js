@@ -114,28 +114,14 @@ class Character extends MovableObject {
 	}
 
 	throwBottle() {
-		if (
-			this.world &&
-			this.world.keyboard &&
-			this.world.hotSauceBar.percentage >= 25
-		) {
+		if (this.world && this.world.keyboard && this.world.hotSauceBar.percentage >= 25 && !this.world.gameDone) {
 			let currentDPressed = this.world.keyboard.D;
 			if (currentDPressed && !this.lastDState) {
 				let thrownBottle = new Bottle(this.x + 100);
 				if (this.otherDirection == false) {
-					thrownBottle.throw(
-						this.x + 100,
-						this.actualY + 40,
-						this.world,
-						"right"
-					);
+					thrownBottle.throw(this.x + 100, this.actualY + 40, this.world, "right");
 				} else {
-					thrownBottle.throw(
-						this.x - 100,
-						this.actualY + 40,
-						this.world,
-						"left"
-					);
+					thrownBottle.throw(this.x - 100, this.actualY + 40, this.world, "left");
 				}
 				this.world.thrownBottles.push(thrownBottle);
 				this.world.hotSauceBar.setPercentage(
@@ -146,13 +132,9 @@ class Character extends MovableObject {
 	}
 
 	triggerSpecialMove() {
-		if (this.world.coinBar.percentage === 100 && this.world.keyboard.F) {
+		if (this.world.coinBar.percentage === 100 && this.world.keyboard.F && !this.world.gameDone) {
 			const moveX = this.otherDirection ? this.x - 420 : this.x + 80;
-			this.specialMove = new SpecialMove(
-				moveX,
-				this.y + 100,
-				this.otherDirection
-			);
+			this.specialMove = new SpecialMove(moveX, this.y + 100, this.otherDirection);
 			this.world.specialMoves.push(this.specialMove);
 			this.world.coinBar.setPercentage(0);
 		}
@@ -165,10 +147,7 @@ class Character extends MovableObject {
 			this.playAnimation(this.IMAGES_HURTING);
 		} else if (this.isAboveGround()) {
 			this.playJumpAnimation();
-		} else if (
-			(this.world.keyboard.RIGHT || this.world.keyboard.LEFT) &&
-			this.world.gameDone === false
-		) {
+		} else if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT) && this.world.gameDone === false) {
 			this.playAnimation(this.IMAGES_WALKING);
 		} else {
 			this.playIdleAnimation();
@@ -176,11 +155,12 @@ class Character extends MovableObject {
 	}
 
 	handleMovement() {
-		if (
-			this.world.keyboard.RIGHT &&
-			this.x < this.world.level.level_end_x &&
-			!this.world.gameDone
-		) {
+		this.handleRight();
+		this.handleLeft();
+	}
+
+	handleRight() {
+		if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x && !this.world.gameDone) {
 			this.otherDirection = false;
 			this.moveRight();
 			if (!this.isAboveGround()) {
@@ -189,7 +169,9 @@ class Character extends MovableObject {
 				}
 			}
 		}
+	}
 
+	handleLeft() {
 		if (this.world.keyboard.LEFT && this.x > 0 && !this.world.gameDone) {
 			this.otherDirection = true;
 			this.moveLeft();
@@ -214,11 +196,7 @@ class Character extends MovableObject {
 
 	checkBackflipReady() {
 		if (this.isAboveGround()) {
-			if (
-				this.world.keyboard.SPACE &&
-				!this.lastSpaceState &&
-				this.backflipReady
-			) {
+			if (this.world.keyboard.SPACE && !this.lastSpaceState && this.backflipReady) {
 				this.backflip();
 				this.backflipReady = false;
 			}
@@ -263,12 +241,7 @@ class Character extends MovableObject {
 	}
 
 	shouldPlayIdleAnimation() {
-		return (
-			!this.isAboveGround() &&
-			!this.world.keyboard.RIGHT &&
-			!this.world.keyboard.LEFT &&
-			!this.world.keyboard.SPACE
-		);
+		return (!this.isAboveGround() && !this.world.keyboard.RIGHT && !this.world.keyboard.LEFT && !this.world.keyboard.SPACE);
 	}
 
 	getIdleImages() {
@@ -360,12 +333,7 @@ class Character extends MovableObject {
 	}
 
 	updateLastInputTime() {
-		if (
-			this.world.keyboard.RIGHT ||
-			this.world.keyboard.LEFT ||
-			this.world.keyboard.SPACE ||
-			this.world.keyboard.D
-		) {
+		if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.SPACE || this.world.keyboard.D) {
 			this.lastInputTime = Date.now();
 		}
 	}

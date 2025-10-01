@@ -83,8 +83,8 @@ h1 {
 }
 
 .control-btn img {
-    height: 50px;
-    width: 50px;
+    height: 35px;
+    width: 35px;
 }
 
 #portrait-message {
@@ -109,6 +109,16 @@ h1 {
         width: 100%;
     }
 }
+@media (max-width: 991px) {
+    .control-panel {
+        display: flex;
+    }
+    #start-btn,
+    #restart-btn {
+        position: absolute;
+        top: 200px;
+    }
+}
 @media (max-width: 700px) {
     html {
         height: 100%;
@@ -124,14 +134,6 @@ h1 {
     #overlay,
     canvas {
         height: 100vh;
-    }
-    .control-panel {
-        display: flex;
-    }
-    #start-btn,
-    #restart-btn {
-        position: absolute;
-        top: 200px;
     }
 }
 /**** Queries ****/

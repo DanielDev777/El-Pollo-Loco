@@ -74,6 +74,8 @@ class MovableObject extends DrawableObject {
   }
 
   jump() {
-    this.speedY = 20;
+    if (!this.world.gameDone) {
+      this.speedY = 20;
+    }
   }
 }
