@@ -259,9 +259,25 @@ class World {
 		
 		const distance = currentTarget - this.camera_x;
 		
-		// Adaptive speed: faster when character is moving, slower when standing
+		// Direction-aware adaptive speed
 		const isCharacterMoving = this.keyboard.LEFT || this.keyboard.RIGHT;
-		const moveSpeed = isCharacterMoving ? 15 : 6;
+		let moveSpeed;
+		
+		if (!isCharacterMoving) {
+			moveSpeed = 10; // Slow and smooth when standing
+		} else {
+			// Different speeds based on transition direction and character movement
+			if (this.camera_mode === 'left' && this.keyboard.LEFT) {
+				// Switching to left while moving left - needs faster catch-up
+				moveSpeed = 25;
+			} else if (this.camera_mode === 'right' && this.keyboard.RIGHT) {
+				// Switching to right while moving right - moderate speed
+				moveSpeed = 25;
+			} else {
+				// Default moving speed
+				moveSpeed = 18;
+			}
+		}
 		
 		if (Math.abs(distance) <= moveSpeed) {
 			// Close enough, snap to target and end transition
