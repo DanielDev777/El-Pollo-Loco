@@ -5,6 +5,12 @@ class World {
 	canvas;
 	keyboard;
 	camera_x = 0;
+	camera_mode = 'right'; // 'left' or 'right'
+	camera_transitioning = false;
+	camera_transition_progress = 0;
+	camera_start_x = 0;
+	camera_end_x = 0;
+	camera_transition_speed = 0.25;
 	healthBar = new HealthBar(40, "character");
 	enemyHealthBar = new HealthBar(800, "enemy");
 	coinBar = new CoinBar();
@@ -216,24 +222,75 @@ class World {
 		this.enemyHealthBar.x = 500;
 	}
 
-	updateCamera() {
-		let targetCameraX;
-		if (
-			(this.keyboard.LEFT && this.character.x > 0) ||
-			this.character.otherDirection
-		) {
-			const cameraOffset = this.canvas.width / 2;
-			targetCameraX = -this.character.x + cameraOffset;
+		updateCamera() {
+		const currentMode = this.getCameraMode();
+		
+		if (this.camera_transitioning) {
+			this.handleCameraTransition();
+		} else if (this.camera_mode !== currentMode) {
+			this.startCameraTransition(currentMode);
 		} else {
-			targetCameraX = -this.character.x + 100;
+			this.updateCameraNormal();
 		}
+	}
+
+	getCameraMode() {
+		return ((this.keyboard.LEFT && this.character.x > 0) || this.character.otherDirection) ? 'left' : 'right';
+	}
+
+	startCameraTransition(newMode) {
+		this.camera_start_x = this.camera_x;
+		this.camera_mode = newMode;
+		this.camera_transitioning = true;
+		this.camera_transition_progress = 0;
+		
+		let targetCameraX = this.calculateTargetPosition(newMode);
 		const leftBoundary = 0;
 		const rightBoundary = -(2800 - this.canvas.width);
-		targetCameraX = Math.max(
-			rightBoundary,
-			Math.min(leftBoundary, targetCameraX)
-		);
+		this.camera_end_x = Math.max(rightBoundary, Math.min(leftBoundary, targetCameraX));
+	}
+
+	handleCameraTransition() {
+		// Recalculate target in case character moved during transition
+		let currentTarget = this.calculateTargetPosition(this.camera_mode);
+		const leftBoundary = 0;
+		const rightBoundary = -(2800 - this.canvas.width);
+		currentTarget = Math.max(rightBoundary, Math.min(leftBoundary, currentTarget));
+		
+		const distance = currentTarget - this.camera_x;
+		const moveSpeed = 6; // Slightly slower for smoother feel
+		
+		if (Math.abs(distance) <= moveSpeed) {
+			// Close enough, snap to target and end transition
+			this.camera_x = currentTarget;
+			this.camera_transitioning = false;
+		} else {
+			// Move at constant speed towards current target
+			this.camera_x += distance > 0 ? moveSpeed : -moveSpeed;
+		}
+		
+		this.camera_x = Math.round(this.camera_x);
+	}
+
+		updateCameraNormal() {
+		let targetCameraX = this.calculateTargetPosition(this.camera_mode);
+		const leftBoundary = 0;
+		const rightBoundary = -(2800 - this.canvas.width);
+		targetCameraX = Math.max(rightBoundary, Math.min(leftBoundary, targetCameraX));
 		this.camera_x = Math.round(targetCameraX);
+	}
+
+	calculateTargetPosition(mode) {
+		if (mode === 'left') {
+			const cameraOffset = this.canvas.width / 2;
+			return -this.character.x + cameraOffset;
+		} else {
+			return -this.character.x + 100;
+		}
+	}
+
+	easeInOut(t) {
+		return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 	}
 
 	playerJumpsOnChicken() {
